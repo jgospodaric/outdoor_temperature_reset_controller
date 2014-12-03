@@ -128,7 +128,7 @@ void print_status(MenuItem* p_menu_item)
   int j;
   byte addr[8];
   
-  Serial.println("Temperture and relay status");
+  Serial.println("Temperature and relay status");
 
   for( i = 0; i < 8; i++) {
     addr[i] = EEPROM.read(boiler_sensor_addr + i);
@@ -147,25 +147,25 @@ void print_status(MenuItem* p_menu_item)
 
 void manual_burner_relay_on(MenuItem* p_menu_item)
 {
-  Serial.println("Item3 Selected");
+  Serial.println("Burner relay ON");
   digitalWrite(burner_relay, HIGH);
 }
 
 void manual_burner_relay_off(MenuItem* p_menu_item)
 {
-  Serial.println("Item3 Selected");
+  Serial.println("Burner relay OFF");
   digitalWrite(burner_relay, LOW);
 }
 
 void manual_pump_relay_on(MenuItem* p_menu_item)
 {
-  Serial.println("Item3 Selected");
+  Serial.println("Pump relay ON");
   digitalWrite(pump_relay, HIGH);
 }
 
 void manual_pump_relay_off(MenuItem* p_menu_item)
 {
-  Serial.println("Item3 Selected");
+  Serial.println("Pump relay OFF");
   digitalWrite(pump_relay, LOW);
 }
 
