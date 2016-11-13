@@ -392,7 +392,7 @@ void two_step_controller()
     addr[i] = EEPROM.read(outdoor_sensor_addr + i);
   }
   
-  outdoor_temperature = 0;//get_temperature(addr);
+  outdoor_temperature = get_temperature(addr);
   
   set_temperature = get_set_temperature(outdoor_temperature, room_set_temperature);
 
