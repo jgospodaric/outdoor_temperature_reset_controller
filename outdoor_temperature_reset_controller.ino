@@ -248,7 +248,7 @@ void print_status(MenuItem* p_menu_item)
   Serial.print(get_temperature(addr));
   Serial.println();
   
-  Serial.println("Pump request status");
+  Serial.println("Pump room request status");
   Serial.print(digitalRead(room_pump_request_status_pin), HEX);
   Serial.println();
   
