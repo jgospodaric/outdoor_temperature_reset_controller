@@ -131,16 +131,35 @@ float get_temperature(byte* addr) {
   return (float)raw / 16.0; 
 }
 
+void get_address_from_eeprom(int eeprom_addr_source, byte* address_target)
+{
+  int byte_index;
+
+  for(byte_index = 0; byte_index < ADDRESS_SIZE; byte_index++)
+  {
+      address_target[byte_index] = EEPROM.read(eeprom_address_source + byte_index);
+  }
+}
+
+
+void put_address_to_eeprom(byte* address_source, int eeprom_address_target)
+{
+  int byte_index;
+
+  for(byte_index = 0; byte_index < ADDRESS_SIZE; byte_index++)
+  {
+    EEPROM.write(eeprom_address_target + byte_index, address_source[byte_index]);
+  }
+}
+
+
 void set_sensor_0_as_outdoor(MenuItem* p_menu_item)
 {
   int i;
   byte addr[ADDRESS_SIZE];
-  
-  for(i = 0; i < ADDRESS_SIZE; i++)
-  {
-      addr[i] = EEPROM.read(temporary_rom_addr + i);
-      EEPROM.write(outdoor_sensor_addr + i, addr[i]);
-  }
+
+  get_address_from_eeprom(temporary_rom_addr, addr);
+  put_address_to_eeprom(addr, outdoor_sensor_addr);
 
   Serial.println("Sensor 0 set as outdoor");
 }
@@ -209,15 +228,14 @@ void reset_eeprom(MenuItem* p_menu_item)
 {
   int i;
   byte empty_value = 0x00;
+  byte empty_address[8] = {0x00};
 
-  for(i = 0; i < 64; i++)
-  {
-      empty_value++;
-      EEPROM.write(boiler_sensor_addr + i, empty_value);
-  }
+  put_address_to_eeprom(boiler_sensor_addr, empty_address);
+  put_address_to_eeprom(outdoor_sensor_addr, empty_address);
+  put_address_to_eeprom(temporary_rom_address, empty_address);
+  put_address_to_eeprom(temporary_rom_address + ADDRESS_SIZE, empty_address);
 
   Serial.println("EEPROM reset");
-
 }
 
 void print_status(MenuItem* p_menu_item)
@@ -230,18 +248,12 @@ void print_status(MenuItem* p_menu_item)
   
   Serial.println("Temperature and relay status");
 
-  for(i = 0; i < ADDRESS_SIZE; i++) {
-    addr[i] = EEPROM.read(boiler_sensor_addr + i);
-  }
-
+  get_address_from_eeprom(boiler_sensor_addr, addr);
   Serial.println("Boiler temperature");
   Serial.print(get_temperature(addr));
   Serial.println();
 
-  for( i = 0; i < ADDRESS_SIZE; i++) {
-    addr[i] = EEPROM.read(outdoor_sensor_addr + i);
-  }
-  
+  get_address_from_eeprom(outdoor_sensor_addr, addr);
   Serial.println("Outdoor temperature = ");
   Serial.print(get_temperature(addr));
   Serial.println();
@@ -378,29 +390,20 @@ void two_step_controller()
   {
     digitalWrite(burner_relay, HIGH);
     digitalWrite(pump_relay, HIGH);
+
     return;
   }
   
-  for(i = 0; i < 8; i++)
-  {
-    addr[i] = EEPROM.read(outdoor_sensor_addr + i);
-  }
-  
+  get_address_from_eeprom(outdoor_sensor_addr, addr);
   outdoor_temperature = get_temperature(addr);
   
   set_temperature = get_set_temperature(outdoor_temperature, room_set_temperature);
 
-  for(i = 0; i < 8; i++)
-  {
-    addr[i] = EEPROM.read(boiler_sensor_addr + i);
-  }
-  
+  get_address_from_eeprom(boiler_sensor_addr, addr);
   boiler_temperature = get_temperature(addr);
-  
+
   boiler_set_temperature_ratio = boiler_temperature / set_temperature;
-  
   boiler_set_temperature_ratio -= 1.0;
-  
   if(boiler_set_temperature_ratio > step_treshhold)
   {
     digitalWrite(burner_relay, HIGH);
