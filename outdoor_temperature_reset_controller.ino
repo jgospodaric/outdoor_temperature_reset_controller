@@ -141,7 +141,6 @@ void get_address_from_eeprom(int eeprom_addr_source, byte* address_target)
   }
 }
 
-
 void put_address_to_eeprom(byte* address_source, int eeprom_address_target)
 {
   int byte_index;
@@ -151,7 +150,6 @@ void put_address_to_eeprom(byte* address_source, int eeprom_address_target)
     EEPROM.write(eeprom_address_target + byte_index, address_source[byte_index]);
   }
 }
-
 
 void set_sensor_0_as_outdoor(MenuItem* p_menu_item)
 {
