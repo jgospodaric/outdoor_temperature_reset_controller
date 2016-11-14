@@ -7,7 +7,6 @@
 #define DATA_SIZE (12)
 #define EEPROM_SIZE (32)
 
-// Menu variables
 MenuSystem menu;
 
 Menu menu_root("Outdoor Temperature Reset Controller");
@@ -34,9 +33,6 @@ int sensor_1_address = sensor_0_address + ADDRESS_SIZE;
 int burner_relay = 3;
 int pump_relay = 4;
 int room_pump_request_status = 5;
-
-
-// Standard arduino functions
 
 void setup()
 {
