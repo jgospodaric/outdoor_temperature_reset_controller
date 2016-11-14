@@ -306,7 +306,7 @@ void loop()
 {
   serial_handler();
   
-  two_step_outdoor_temperature_reset_controller();
+  execute_two_step_outdoor_temperature_reset_controller();
 
   delay(2000);
 }
@@ -376,7 +376,7 @@ void print_help() {
   Serial.println("***************");
 }
 
-void two_step_outdoor_temperature_reset_controller()
+void execute_two_step_outdoor_temperature_reset_controller()
 {
   bool pump_requested_status;
   byte address[ADDRESS_SIZE];
