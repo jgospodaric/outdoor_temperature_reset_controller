@@ -19,14 +19,6 @@ MenuItem menu_reset_eeprom("Reset EEPROM");
 
 MenuItem menu_print_status("Print temperatures and relay status");
 
-Menu menu_manual_burner_relay("Manual burner relay control");
-MenuItem menu_manual_burner_relay_on("On");
-MenuItem menu_manual_burner_relay_off("Off");
-
-Menu menu_manual_pump_relay("Manual pump relay control");
-MenuItem menu_manual_pump_relay_on("On");
-MenuItem menu_manual_pump_relay_off("Off");
-
 OneWire  ds(2);
 
 int boiler_sensor_addr = 1;
@@ -61,7 +53,7 @@ void scan_temperature_sensors(MenuItem* p_menu_item)
     
     for(i = 0; i < 8; i++) {
       Serial.write(" ");
-      
+
       Serial.print(addr[i], HEX);
       
       EEPROM.write(temporary_rom + i, addr[i]);
