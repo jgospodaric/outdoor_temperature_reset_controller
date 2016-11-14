@@ -63,34 +63,30 @@ void setup()
 
 void scan_temperature_sensors(MenuItem* p_menu_item)
 {
-  int i;
-  byte addr[ADDRESS_SIZE];
-  int temporary_rom;
-  int number_of_sensors;
+  byte address[ADDRESS_SIZE];
+  int sensor_eeprom_address_begin = 0;
+  int number_of_sensors = 0;
   
   Serial.println("Searching sensors");
-  
-  temporary_rom = sensor_0_eeprom_address_begin;
-  number_of_sensors = 0;
 
-  while(ds.search(addr)) {
+  while(ds.search(address)) {
+    switch(number_of_sensors)
+    {
+      case 0:
+        sensor_eeprom_address_begin = sensor_0_eeprom_address_begin;
+      case 1:
+        sensor_eeprom_address_begin = sensor_1_eeprom_address_begin;
+    }
+
     Serial.print("Found ROM[sensor ");
     Serial.print(number_of_sensors, DEC);
     Serial.print("]");
     Serial.println();
     
-    for(i = 0; i < ADDRESS_SIZE; i++) {
-      Serial.write(" ");
+    put_address_to_eeprom(address, sensor_eeprom_address_begin);
+    print_address(address);
 
-      Serial.print(addr[i], HEX);
-      
-      EEPROM.write(temporary_rom + i, addr[i]);
-    }
-    Serial.println();
-    
-    temporary_rom += ADDRESS_SIZE;
-    number_of_sensors += 1;
-    
+    number_of_sensors += 1;    
   }
 
   Serial.print("Found ");
@@ -99,23 +95,23 @@ void scan_temperature_sensors(MenuItem* p_menu_item)
   Serial.println();
 }
 
-float get_temperature_from_sensor_ds18x20(byte* addr) {
+float get_temperature_from_sensor_ds18x20(byte* address) {
   byte data[DATA_SIZE];
   byte type_s;
   byte present = 0;
   
   ds.reset();
-  ds.select(addr);
+  ds.select(address);
   ds.write(0x44, 0);
   int i;
   
-  if(OneWire::crc8(addr, LAST_ADDRESS_BYTE) != addr[LAST_ADDRESS_BYTE]) {
+  if(OneWire::crc8(address, LAST_ADDRESS_BYTE) != address[LAST_ADDRESS_BYTE]) {
       Serial.println("Addr. CRC is not valid!");
       return 0.0;
   }
   
   present = ds.reset();
-  ds.select(addr);
+  ds.select(address);
   // Read Scratchpad
   ds.write(0xBE);
 
@@ -124,7 +120,7 @@ float get_temperature_from_sensor_ds18x20(byte* addr) {
     data[i] = ds.read();
   }
   
-  switch(addr[0]) {
+  switch(address[0]) {
     case 0x10:
       type_s = 1;
       break;
@@ -232,20 +228,20 @@ void print_status(MenuItem* p_menu_item)
 {
   int i;
   int j;
-  byte addr[ADDRESS_SIZE];
+  byte address[ADDRESS_SIZE];
   
   print_eeprom_addresses();
   
   Serial.println("Temperature and relay status");
 
-  get_address_from_eeprom(boiler_sensor_eeprom_address_begin, addr);
+  get_address_from_eeprom(boiler_sensor_eeprom_address_begin, address);
   Serial.println("Boiler temperature");
-  Serial.print(get_temperature_from_sensor_ds18x20(addr));
+  Serial.print(get_temperature_from_sensor_ds18x20(address));
   Serial.println();
 
-  get_address_from_eeprom(outdoor_sensor_eeprom_address_begin, addr);
+  get_address_from_eeprom(outdoor_sensor_eeprom_address_begin, address);
   Serial.println("Outdoor temperature");
-  Serial.print(get_temperature_from_sensor_ds18x20(addr));
+  Serial.print(get_temperature_from_sensor_ds18x20(address));
   Serial.println();
   
   Serial.println("Pump room request status");
@@ -295,12 +291,10 @@ void print_address(byte* address)
 
 void loop()
 {
-  // Handle serial commands
   serialHandler();
   
   two_step_controller();
 
-  // Wait for two seconds so the output is viewable
   delay(2000);
 }
 
@@ -369,8 +363,7 @@ void serialPrintHelp() {
 void two_step_controller()
 {
   bool pump_requested_status;
-  byte addr[ADDRESS_SIZE];
-  int i;
+  byte address[ADDRESS_SIZE];
   float outdoor_temperature;
   float set_temperature;
   float boiler_temperature;
@@ -387,13 +380,13 @@ void two_step_controller()
     return;
   }
   
-  get_address_from_eeprom(outdoor_sensor_eeprom_address_begin, addr);
-  outdoor_temperature = get_temperature_from_sensor_ds18x20(addr);
+  get_address_from_eeprom(outdoor_sensor_eeprom_address_begin, address);
+  outdoor_temperature = get_temperature_from_sensor_ds18x20(address);
   
   set_temperature = get_set_temperature(outdoor_temperature, room_set_temperature);
 
-  get_address_from_eeprom(boiler_sensor_eeprom_address_begin, addr);
-  boiler_temperature = get_temperature_from_sensor_ds18x20(addr);
+  get_address_from_eeprom(boiler_sensor_eeprom_address_begin, address);
+  boiler_temperature = get_temperature_from_sensor_ds18x20(address);
 
   boiler_set_temperature_ratio = boiler_temperature / set_temperature;
   boiler_set_temperature_ratio -= 1.0;
@@ -411,5 +404,6 @@ void two_step_controller()
 
 float get_set_temperature(float outdoor_temperature, float room_set_temperature)
 {
+  // see doc/reset_curves_line_equations.ods in project
   return -1.1 * outdoor_temperature + 42.0 + 0.97 * room_set_temperature - 19.30;
 }
