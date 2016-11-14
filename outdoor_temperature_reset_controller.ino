@@ -37,7 +37,6 @@ int room_pump_request_status = 5;
 void setup()
 {
   Serial.begin(9600);
-  serialPrintHelp();
   pinMode(burner_relay, OUTPUT);
   digitalWrite(burner_relay, HIGH);
   pinMode(pump_relay, OUTPUT);
