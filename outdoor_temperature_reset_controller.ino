@@ -24,7 +24,7 @@ MenuItem menu_reset_eeprom("Reset EEPROM");
 
 MenuItem menu_print_status("Print temperatures and relay status");
 
-OneWire  ds(2);
+OneWire ds(2);
 
 int boiler_sensor_addr = 1;
 int outdoor_sensor_addr = boiler_sensor_addr + ADDRESS_SIZE;
@@ -34,6 +34,36 @@ int sensor_1_address = sensor_0_address + ADDRESS_SIZE;
 int burner_relay = 3;
 int pump_relay = 4;
 int room_pump_request_status = 5;
+
+
+// Standard arduino functions
+
+void setup()
+{
+  Serial.begin(9600);
+  serialPrintHelp();
+  pinMode(burner_relay, OUTPUT);
+  digitalWrite(burner_relay, HIGH);
+  pinMode(pump_relay, OUTPUT);
+  digitalWrite(pump_relay, HIGH);
+  pinMode(room_pump_request_status, INPUT);
+
+  menu_root.add_item(&menu_scan_temperature_sensors, &scan_temperature_sensors);
+
+  menu_root.add_menu(&menu_select_temperature_sensors);
+  menu_select_temperature_sensors.add_item(&menu_set_sensor_0_as_outdoor, set_sensor_0_as_outdoor);
+  menu_select_temperature_sensors.add_item(&menu_set_sensor_0_as_boiler, set_sensor_0_as_boiler);
+  menu_select_temperature_sensors.add_item(&menu_set_sensor_1_as_outdoor, set_sensor_1_as_outdoor);
+  menu_select_temperature_sensors.add_item(&menu_set_sensor_1_as_boiler, set_sensor_1_as_boiler);
+  
+  menu_root.add_item(&menu_reset_eeprom, &reset_eeprom_addresses);
+  
+  menu_root.add_item(&menu_print_status, &print_status);
+
+  menu.set_root_menu(&menu_root);
+
+  displayMenu();
+}
 
 void scan_temperature_sensors(MenuItem* p_menu_item)
 {
@@ -132,34 +162,6 @@ float get_temperature(byte* addr) {
   return (float)raw / 16.0; 
 }
 
-void copy_address_in_eeprom(int eeprom_address_source, int eeprom_address_target)
-{
-  byte tmp_address[ADDRESS_SIZE];
-
-  get_address_from_eeprom(eeprom_address_source, tmp_address);
-  put_address_to_eeprom(tmp_address, eeprom_address_target);
-}
-
-void get_address_from_eeprom(int eeprom_address_source, byte* address_target)
-{
-  int byte_index;
-
-  for(byte_index = 0; byte_index < ADDRESS_SIZE; byte_index++)
-  {
-      address_target[byte_index] = EEPROM.read(eeprom_address_source + byte_index);
-  }
-}
-
-void put_address_to_eeprom(byte* address_source, int eeprom_address_target)
-{
-  int byte_index;
-
-  for(byte_index = 0; byte_index < ADDRESS_SIZE; byte_index++)
-  {
-    EEPROM.write(eeprom_address_target + byte_index, address_source[byte_index]);
-  }
-}
-
 void set_sensor_0_as_outdoor(MenuItem* p_menu_item)
 {
   copy_address_in_eeprom(sensor_0_address, outdoor_sensor_addr);
@@ -188,36 +190,32 @@ void set_sensor_1_as_boiler(MenuItem* p_menu_item)
   Serial.println("Sensor 1 set as boiler");
 }
 
-void print_address(byte* address)
+void copy_address_in_eeprom(int eeprom_address_source, int eeprom_address_target)
+{
+  byte tmp_address[ADDRESS_SIZE];
+
+  get_address_from_eeprom(eeprom_address_source, tmp_address);
+  put_address_to_eeprom(tmp_address, eeprom_address_target);
+}
+
+void get_address_from_eeprom(int eeprom_address_source, byte* address_target)
 {
   int byte_index;
 
   for(byte_index = 0; byte_index < ADDRESS_SIZE; byte_index++)
   {
-    Serial.print(address[byte_index], HEX);
-    Serial.print(" ");
+      address_target[byte_index] = EEPROM.read(eeprom_address_source + byte_index);
   }
-  Serial.println();
 }
 
-void print_eeprom_addresses()
+void put_address_to_eeprom(byte* address_source, int eeprom_address_target)
 {
-  int i;
-  byte address[8];
+  int byte_index;
 
-  get_address_from_eeprom(boiler_sensor_addr, address);
-  print_address(address);
-  
-  get_address_from_eeprom(outdoor_sensor_addr, address);
-  print_address(address);
-  
-  get_address_from_eeprom(sensor_0_address, address);
-  print_address(address);
-  
-  get_address_from_eeprom(sensor_1_address, address);
-  print_address(address);
-
-  Serial.println();
+  for(byte_index = 0; byte_index < ADDRESS_SIZE; byte_index++)
+  {
+    EEPROM.write(eeprom_address_target + byte_index, address_source[byte_index]);
+  }
 }
 
 void reset_eeprom_addresses(MenuItem* p_menu_item)
@@ -267,33 +265,36 @@ void print_status(MenuItem* p_menu_item)
   Serial.println();  
 }
 
-// Standard arduino functions
-
-void setup()
+void print_eeprom_addresses()
 {
-  Serial.begin(9600);
-  serialPrintHelp();
-  pinMode(burner_relay, OUTPUT);
-  digitalWrite(burner_relay, HIGH);
-  pinMode(pump_relay, OUTPUT);
-  digitalWrite(pump_relay, HIGH);
-  pinMode(room_pump_request_status, INPUT);
+  int i;
+  byte address[8];
 
-  menu_root.add_item(&menu_scan_temperature_sensors, &scan_temperature_sensors);
-
-  menu_root.add_menu(&menu_select_temperature_sensors);
-  menu_select_temperature_sensors.add_item(&menu_set_sensor_0_as_outdoor, set_sensor_0_as_outdoor);
-  menu_select_temperature_sensors.add_item(&menu_set_sensor_0_as_boiler, set_sensor_0_as_boiler);
-  menu_select_temperature_sensors.add_item(&menu_set_sensor_1_as_outdoor, set_sensor_1_as_outdoor);
-  menu_select_temperature_sensors.add_item(&menu_set_sensor_1_as_boiler, set_sensor_1_as_boiler);
+  get_address_from_eeprom(boiler_sensor_addr, address);
+  print_address(address);
   
-  menu_root.add_item(&menu_reset_eeprom, &reset_eeprom_addresses);
+  get_address_from_eeprom(outdoor_sensor_addr, address);
+  print_address(address);
   
-  menu_root.add_item(&menu_print_status, &print_status);
+  get_address_from_eeprom(sensor_0_address, address);
+  print_address(address);
+  
+  get_address_from_eeprom(sensor_1_address, address);
+  print_address(address);
 
-  menu.set_root_menu(&menu_root);
+  Serial.println();
+}
 
-  displayMenu();
+void print_address(byte* address)
+{
+  int byte_index;
+
+  for(byte_index = 0; byte_index < ADDRESS_SIZE; byte_index++)
+  {
+    Serial.print(address[byte_index], HEX);
+    Serial.print(" ");
+  }
+  Serial.println();
 }
 
 void loop()
@@ -305,27 +306,6 @@ void loop()
 
   // Wait for two seconds so the output is viewable
   delay(2000);
-}
-
-void displayMenu() {
-  Serial.println("");
-  // Display the menu
-  Menu const* cp_menu = menu.get_current_menu();
-
-  Serial.print("Current menu name: ");
-  Serial.println(cp_menu->get_name());
-
-  MenuComponent const* cp_menu_sel = cp_menu->get_selected();
-  for(int i = 0; i < cp_menu->get_num_menu_components(); ++i)
-  {
-    MenuComponent const* cp_m_comp = cp_menu->get_menu_component(i);
-    Serial.print(cp_m_comp->get_name());
-
-    if(cp_menu_sel == cp_m_comp)
-      Serial.print("<<< ");
-
-    Serial.println("");
-  }
 }
 
 void serialHandler() {
@@ -355,6 +335,27 @@ void serialHandler() {
     default:
       break;
     }
+  }
+}
+
+void displayMenu() {
+  Serial.println("");
+  // Display the menu
+  Menu const* cp_menu = menu.get_current_menu();
+
+  Serial.print("Current menu name: ");
+  Serial.println(cp_menu->get_name());
+
+  MenuComponent const* cp_menu_sel = cp_menu->get_selected();
+  for(int i = 0; i < cp_menu->get_num_menu_components(); ++i)
+  {
+    MenuComponent const* cp_m_comp = cp_menu->get_menu_component(i);
+    Serial.print(cp_m_comp->get_name());
+
+    if(cp_menu_sel == cp_m_comp)
+      Serial.print("<<< ");
+
+    Serial.println("");
   }
 }
 
