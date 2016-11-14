@@ -58,7 +58,7 @@ void setup()
 
   menu.set_root_menu(&menu_root);
 
-  displayMenu();
+  display_menu();
 }
 
 void scan_temperature_sensors(MenuItem* p_menu_item)
@@ -226,8 +226,6 @@ void reset_eeprom_addresses(MenuItem* p_menu_item)
 
 void print_status(MenuItem* p_menu_item)
 {
-  int i;
-  int j;
   byte address[ADDRESS_SIZE];
   
   print_eeprom_addresses();
@@ -259,7 +257,6 @@ void print_status(MenuItem* p_menu_item)
 
 void print_eeprom_addresses()
 {
-  int i;
   byte address[8];
 
   get_address_from_eeprom(boiler_sensor_eeprom_address_begin, address);
@@ -291,36 +288,36 @@ void print_address(byte* address)
 
 void loop()
 {
-  serialHandler();
+  serial_handler();
   
   two_step_controller();
 
   delay(2000);
 }
 
-void serialHandler() {
-  char inChar;
-  if((inChar = Serial.read())>0) {
-    switch(inChar) {
+void serial_handler() {
+  char input_character;
+  if((input_character = Serial.read())>0) {
+    switch(input_character) {
     case 'w': // Previus item
       menu.prev();
-      displayMenu();
+      display_menu();
       break;
     case 's': // Next item
       menu.next();
-      displayMenu();
+      display_menu();
       break;
     case 'a': // Back presed
       menu.back();
-      displayMenu();
+      display_menu();
       break;
     case 'd': // Select presed
       menu.select();
-      displayMenu();
+      display_menu();
       break;
     case '?':
     case 'h': // Display help
-      serialPrintHelp();
+      print_help();
       break;
     default:
       break;
@@ -328,7 +325,7 @@ void serialHandler() {
   }
 }
 
-void displayMenu() {
+void display_menu() {
   Serial.println("");
   // Display the menu
   Menu const* cp_menu = menu.get_current_menu();
@@ -349,7 +346,7 @@ void displayMenu() {
   }
 }
 
-void serialPrintHelp() {
+void print_help() {
   Serial.println("***************");
   Serial.println("w: go to previus item (up)");
   Serial.println("s: go to next item (down)");
