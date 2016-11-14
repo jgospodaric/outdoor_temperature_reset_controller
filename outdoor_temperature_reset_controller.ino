@@ -12,7 +12,7 @@ MenuSystem menu;
 
 Menu menu_root("Outdoor Temperature Reset Controller");
 
-MenuItem menu_scan_temperature_sensors("Scan temperature sensors");
+MenuItem menu_scan_temperature_sensors("Scan for temperature sensors");
 
 Menu menu_select_temperature_sensors("Set temperature sensors");
 MenuItem menu_set_sensor_0_as_boiler("Set sensor 0 as boiler");
@@ -22,7 +22,7 @@ MenuItem menu_set_sensor_1_as_outdoor("Set sensor 1 as outdoor");
 
 MenuItem menu_reset_eeprom("Reset EEPROM");
 
-MenuItem menu_print_status("Print temperatures and relay status");
+MenuItem menu_print_status("Print status");
 
 OneWire ds(2);
 
