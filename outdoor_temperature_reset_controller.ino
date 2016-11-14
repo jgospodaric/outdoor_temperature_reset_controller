@@ -158,13 +158,6 @@ float get_temperature(byte* addr) {
   return (float)raw / 16.0; 
 }
 
-void set_sensor_0_as_outdoor(MenuItem* p_menu_item)
-{
-  copy_address_in_eeprom(sensor_0_eeprom_address_begin, outdoor_sensor_eeprom_address_begin);
-
-  Serial.println("Sensor 0 set as outdoor");
-}
-
 void set_sensor_0_as_boiler(MenuItem* p_menu_item)
 {
   copy_address_in_eeprom(sensor_0_eeprom_address_begin, boiler_sensor_eeprom_address_begin);
@@ -172,11 +165,11 @@ void set_sensor_0_as_boiler(MenuItem* p_menu_item)
   Serial.println("Sensor 0 set as boiler");
 }
 
-void set_sensor_1_as_outdoor(MenuItem* p_menu_item)
+void set_sensor_0_as_outdoor(MenuItem* p_menu_item)
 {
-  copy_address_in_eeprom(sensor_1_eeprom_address_begin, outdoor_sensor_eeprom_address_begin);
+  copy_address_in_eeprom(sensor_0_eeprom_address_begin, outdoor_sensor_eeprom_address_begin);
 
-  Serial.println("Sensor 1 set as outdoor");
+  Serial.println("Sensor 0 set as outdoor");
 }
 
 void set_sensor_1_as_boiler(MenuItem* p_menu_item)
@@ -184,6 +177,13 @@ void set_sensor_1_as_boiler(MenuItem* p_menu_item)
   copy_address_in_eeprom(sensor_1_eeprom_address_begin, boiler_sensor_eeprom_address_begin);
 
   Serial.println("Sensor 1 set as boiler");
+}
+
+void set_sensor_1_as_outdoor(MenuItem* p_menu_item)
+{
+  copy_address_in_eeprom(sensor_1_eeprom_address_begin, outdoor_sensor_eeprom_address_begin);
+
+  Serial.println("Sensor 1 set as outdoor");
 }
 
 void copy_address_in_eeprom(int eeprom_address_source, int eeprom_address_target)
