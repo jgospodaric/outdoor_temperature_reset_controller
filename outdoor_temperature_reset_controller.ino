@@ -103,7 +103,6 @@ float get_temperature_from_sensor_ds18x20(byte* address) {
   ds.reset();
   ds.select(address);
   ds.write(0x44, 0);
-  int i;
   
   if(OneWire::crc8(address, LAST_ADDRESS_BYTE) != address[LAST_ADDRESS_BYTE]) {
       Serial.println("Addr. CRC is not valid!");
