@@ -99,7 +99,7 @@ void scan_temperature_sensors(MenuItem* p_menu_item)
   Serial.println();
 }
 
-float get_temperature(byte* addr) {
+float get_temperature_from_sensor_ds18x20(byte* addr) {
   byte data[DATA_SIZE];
   byte type_s;
   byte present = 0;
@@ -240,12 +240,12 @@ void print_status(MenuItem* p_menu_item)
 
   get_address_from_eeprom(boiler_sensor_eeprom_address_begin, addr);
   Serial.println("Boiler temperature");
-  Serial.print(get_temperature(addr));
+  Serial.print(get_temperature_from_sensor_ds18x20(addr));
   Serial.println();
 
   get_address_from_eeprom(outdoor_sensor_eeprom_address_begin, addr);
   Serial.println("Outdoor temperature");
-  Serial.print(get_temperature(addr));
+  Serial.print(get_temperature_from_sensor_ds18x20(addr));
   Serial.println();
   
   Serial.println("Pump room request status");
@@ -388,12 +388,12 @@ void two_step_controller()
   }
   
   get_address_from_eeprom(outdoor_sensor_eeprom_address_begin, addr);
-  outdoor_temperature = get_temperature(addr);
+  outdoor_temperature = get_temperature_from_sensor_ds18x20(addr);
   
   set_temperature = get_set_temperature(outdoor_temperature, room_set_temperature);
 
   get_address_from_eeprom(boiler_sensor_eeprom_address_begin, addr);
-  boiler_temperature = get_temperature(addr);
+  boiler_temperature = get_temperature_from_sensor_ds18x20(addr);
 
   boiler_set_temperature_ratio = boiler_temperature / set_temperature;
   boiler_set_temperature_ratio -= 1.0;
