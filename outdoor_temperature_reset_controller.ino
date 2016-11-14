@@ -72,10 +72,10 @@ void scan_temperature_sensors(MenuItem* p_menu_item)
   while(ds.search(address)) {
     switch(number_of_sensors)
     {
-      case 0:
-        sensor_eeprom_address_begin = sensor_0_eeprom_address_begin;
-      case 1:
-        sensor_eeprom_address_begin = sensor_1_eeprom_address_begin;
+    case 0:
+      sensor_eeprom_address_begin = sensor_0_eeprom_address_begin;
+    case 1:
+      sensor_eeprom_address_begin = sensor_1_eeprom_address_begin;
     }
 
     Serial.print("Found ROM[sensor ");
@@ -298,7 +298,8 @@ void loop()
 void serial_handler() {
   char input_character;
   if((input_character = Serial.read())>0) {
-    switch(input_character) {
+    switch(input_character)
+    {
     case 'w': // Previus item
       menu.prev();
       display_menu();
@@ -340,7 +341,9 @@ void display_menu() {
     Serial.print(cp_m_comp->get_name());
 
     if(cp_menu_sel == cp_m_comp)
+    {
       Serial.print("<<< ");
+    }
 
     Serial.println("");
   }
