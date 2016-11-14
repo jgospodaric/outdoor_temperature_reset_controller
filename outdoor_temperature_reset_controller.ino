@@ -3,6 +3,9 @@
 #include <EEPROM.h>
 
 #define ADDRESS_SIZE (8)
+#define LAST_ADDRESS_BYTE (ADDRESS_SIZE - 1)
+#define DATA_SIZE (12)
+#define EEPROM_SIZE (32)
 
 // Menu variables
 MenuSystem menu;
@@ -34,7 +37,7 @@ int room_pump_request_status = 5;
 void scan_temperature_sensors(MenuItem* p_menu_item)
 {
   int i;
-  byte addr[8];
+  byte addr[ADDRESS_SIZE];
   int temporary_rom;
   int number_of_sensors;
   
@@ -49,7 +52,7 @@ void scan_temperature_sensors(MenuItem* p_menu_item)
     Serial.print("] = ");
     Serial.println();
     
-    for(i = 0; i < 8; i++) {
+    for(i = 0; i < ADDRESS_SIZE; i++) {
       Serial.write(" ");
 
       Serial.print(addr[i], HEX);
@@ -58,7 +61,7 @@ void scan_temperature_sensors(MenuItem* p_menu_item)
     }
     Serial.println();
     
-    temporary_rom += 8;
+    temporary_rom += ADDRESS_SIZE;
     number_of_sensors += 1;
     
   }
@@ -70,7 +73,7 @@ void scan_temperature_sensors(MenuItem* p_menu_item)
 }
 
 float get_temperature(byte* addr) {
-  byte data[12];
+  byte data[DATA_SIZE];
   byte type_s;
   byte present = 0;
   
@@ -79,16 +82,18 @@ float get_temperature(byte* addr) {
   ds.write(0x44, 0);
   int i;
   
-  if(OneWire::crc8(addr, 7) != addr[7]) {
+  if(OneWire::crc8(addr, LAST_ADDRESS_BYTE) != addr[LAST_ADDRESS_BYTE]) {
       Serial.println("Addr. CRC is not valid!");
       return 0.0;
   }
   
   present = ds.reset();
-  ds.select(addr);    
-  ds.write(0xBE);         // Read Scratchpad
+  ds.select(addr);
+  // Read Scratchpad
+  ds.write(0xBE);
 
-  for(i = 0; i < 9; i++) {           // we need 9 bytes
+  // We need 9 bytes
+  for(i = 0; i < 9; i++) {
     data[i] = ds.read();
   }
   
@@ -129,9 +134,9 @@ float get_temperature(byte* addr) {
 void set_sensor_0_as_outdoor(MenuItem* p_menu_item)
 {
   int i;
-  byte addr[8];
+  byte addr[ADDRESS_SIZE];
   
-  for(i = 0; i < 8; i++)
+  for(i = 0; i < ADDRESS_SIZE; i++)
   {
       addr[i] = EEPROM.read(temporary_rom_addr + i);
       EEPROM.write(outdoor_sensor_addr + i, addr[i]);
@@ -143,9 +148,9 @@ void set_sensor_0_as_outdoor(MenuItem* p_menu_item)
 void set_sensor_0_as_boiler(MenuItem* p_menu_item)
 {
   int i;
-  byte addr[8];
+  byte addr[ADDRESS_SIZE];
   
-  for(i = 0; i < 8; i++)
+  for(i = 0; i < ADDRESS_SIZE; i++)
   {
       addr[i] = EEPROM.read(temporary_rom_addr + i);
       EEPROM.write(boiler_sensor_addr + i, addr[i]);
@@ -157,9 +162,9 @@ void set_sensor_0_as_boiler(MenuItem* p_menu_item)
 void set_sensor_1_as_outdoor(MenuItem* p_menu_item)
 {
   int i;
-  byte addr[8];
+  byte addr[ADDRESS_SIZE];
   
-  for(i = 0; i < 8; i++)
+  for(i = 0; i < ADDRESS_SIZE; i++)
   {
       addr[i] = EEPROM.read(temporary_rom_addr + 8 + i);
       EEPROM.write(outdoor_sensor_addr + i, addr[i]);
@@ -171,9 +176,9 @@ void set_sensor_1_as_outdoor(MenuItem* p_menu_item)
 void set_sensor_1_as_boiler(MenuItem* p_menu_item)
 {
   int i;
-  byte addr[8];
+  byte addr[ADDRESS_SIZE];
   
-  for(i = 0; i < 8; i++)
+  for(i = 0; i < ADDRESS_SIZE; i++)
   {
       addr[i] = EEPROM.read(temporary_rom_addr + 8 + i);
       EEPROM.write(boiler_sensor_addr + i, addr[i]);
@@ -187,9 +192,9 @@ void print_eeprom()
   int i;
   byte value;
   
-  for(i = 0; i < 32; i++)
+  for(i = 0; i < EEPROM_SIZE; i++)
   {
-    if(i > 0 && (i % 8 == 0))
+    if(i > 0 && (i % ADDRESS_SIZE == 0))
     {
       Serial.println();
     }
@@ -219,13 +224,13 @@ void print_status(MenuItem* p_menu_item)
 {
   int i;
   int j;
-  byte addr[8];
+  byte addr[ADDRESS_SIZE];
   
   print_eeprom();
   
   Serial.println("Temperature and relay status");
 
-  for(i = 0; i < 8; i++) {
+  for(i = 0; i < ADDRESS_SIZE; i++) {
     addr[i] = EEPROM.read(boiler_sensor_addr + i);
   }
 
@@ -233,7 +238,7 @@ void print_status(MenuItem* p_menu_item)
   Serial.print(get_temperature(addr));
   Serial.println();
 
-  for( i = 0; i < 8; i++) {
+  for( i = 0; i < ADDRESS_SIZE; i++) {
     addr[i] = EEPROM.read(outdoor_sensor_addr + i);
   }
   
@@ -265,7 +270,6 @@ void setup()
   pinMode(pump_relay, OUTPUT);
   digitalWrite(pump_relay, HIGH);
   pinMode(room_pump_request_status, INPUT);
-  Serial.println("test");
 
   menu_root.add_item(&menu_scan_temperature_sensors, &scan_temperature_sensors);
 
@@ -360,7 +364,7 @@ void serialPrintHelp() {
 void two_step_controller()
 {
   bool pump_requested_status;
-  byte addr[8];
+  byte addr[ADDRESS_SIZE];
   int i;
   float outdoor_temperature;
   float set_temperature;
