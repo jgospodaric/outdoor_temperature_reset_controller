@@ -3,7 +3,8 @@
 #include <EEPROM.h>
 
 #define ADDRESS_SIZE (8)
-#define LAST_ADDRESS_BYTE (ADDRESS_SIZE - 1)
+#define ADDRESS_FIRST_BYTE_INDEX (0)
+#define ADDRESS_LAST_BYTE_INDEX (ADDRESS_SIZE - 1)
 #define DATA_SIZE (12)
 #define EEPROM_SIZE (32)
 
@@ -105,7 +106,7 @@ float get_temperature_from_sensor_ds18x20(byte* address) {
   ds.select(address);
   ds.write(0x44, 0);
   
-  if(OneWire::crc8(address, LAST_ADDRESS_BYTE) != address[LAST_ADDRESS_BYTE])
+  if(OneWire::crc8(address, ADDRESS_LAST_BYTE_INDEX) != address[ADDRESS_LAST_BYTE_INDEX])
   {
     Serial.println("Addr. CRC is not valid!");
     return 0.0;
@@ -210,7 +211,7 @@ void get_address_from_eeprom(int eeprom_address_source, byte* address_target)
 {
   int byte_index;
 
-  for(byte_index = 0; byte_index < ADDRESS_SIZE; byte_index++)
+  for(byte_index = ADDRESS_FIRST_BYTE_INDEX; byte_index <= ADDRESS_LAST_BYTE_INDEX; byte_index++)
   {
       address_target[byte_index] = EEPROM.read(eeprom_address_source + byte_index);
   }
@@ -220,7 +221,7 @@ void put_address_to_eeprom(byte* address_source, int eeprom_address_target)
 {
   int byte_index;
 
-  for(byte_index = 0; byte_index < ADDRESS_SIZE; byte_index++)
+  for(byte_index = ADDRESS_FIRST_BYTE_INDEX; byte_index <= ADDRESS_LAST_BYTE_INDEX; byte_index++)
   {
     EEPROM.write(eeprom_address_target + byte_index, address_source[byte_index]);
   }
@@ -229,8 +230,7 @@ void put_address_to_eeprom(byte* address_source, int eeprom_address_target)
 void reset_eeprom_addresses(MenuItem* p_menu_item)
 {
   int i;
-  byte empty_value = 0x00;
-  byte empty_address[8] = {0x00};
+  byte empty_address[ADDRESS_SIZE] = {0x00};
 
   put_address_to_eeprom(empty_address, boiler_sensor_eeprom_address_begin);
   put_address_to_eeprom(empty_address, outdoor_sensor_eeprom_address_begin);
@@ -273,7 +273,7 @@ void print_status(MenuItem* p_menu_item)
 
 void print_eeprom_addresses()
 {
-  byte address[8];
+  byte address[ADDRESS_SIZE];
 
   get_address_from_eeprom(boiler_sensor_eeprom_address_begin, address);
   print_address(address);
@@ -294,7 +294,7 @@ void print_address(byte* address)
 {
   int byte_index;
 
-  for(byte_index = 0; byte_index < ADDRESS_SIZE; byte_index++)
+  for(byte_index = ADDRESS_FIRST_BYTE_INDEX; byte_index <= ADDRESS_LAST_BYTE_INDEX; byte_index++)
   {
     Serial.print(address[byte_index], HEX);
     Serial.print(" ");
