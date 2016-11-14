@@ -13,11 +13,11 @@ Menu menu_root("Outdoor Temperature Reset Controller");
 
 MenuItem menu_scan_temperature_sensors("Scan temperature sensors");
 
-Menu menu_select_temperature_sensors("Select temperature sensors");
-MenuItem menu_set_sensor_0_as_outdoor("Set sensor 0 as outdoor");
+Menu menu_select_temperature_sensors("Set temperature sensors");
 MenuItem menu_set_sensor_0_as_boiler("Set sensor 0 as boiler");
-MenuItem menu_set_sensor_1_as_outdoor("Set sensor 1 as outdoor");
+MenuItem menu_set_sensor_0_as_outdoor("Set sensor 0 as outdoor");
 MenuItem menu_set_sensor_1_as_boiler("Set sensor 1 as boiler");
+MenuItem menu_set_sensor_1_as_outdoor("Set sensor 1 as outdoor");
 
 MenuItem menu_reset_eeprom("Reset EEPROM");
 
@@ -25,10 +25,10 @@ MenuItem menu_print_status("Print temperatures and relay status");
 
 OneWire ds(2);
 
-int boiler_sensor_addr = 1;
-int outdoor_sensor_addr = boiler_sensor_addr + ADDRESS_SIZE;
-int sensor_0_address = outdoor_sensor_addr + ADDRESS_SIZE;
-int sensor_1_address = sensor_0_address + ADDRESS_SIZE;
+int boiler_sensor_eeprom_address_begin = 1;
+int outdoor_sensor_eeprom_address_begin = boiler_sensor_eeprom_address_begin + ADDRESS_SIZE;
+int sensor_0_eeprom_address_begin = outdoor_sensor_eeprom_address_begin + ADDRESS_SIZE;
+int sensor_1_eeprom_address_begin = sensor_0_eeprom_address_begin + ADDRESS_SIZE;
 
 int burner_relay_pin = 3;
 int pump_relay_pin = 4;
@@ -47,10 +47,10 @@ void setup()
   menu_root.add_item(&menu_scan_temperature_sensors, &scan_temperature_sensors);
 
   menu_root.add_menu(&menu_select_temperature_sensors);
-  menu_select_temperature_sensors.add_item(&menu_set_sensor_0_as_outdoor, set_sensor_0_as_outdoor);
   menu_select_temperature_sensors.add_item(&menu_set_sensor_0_as_boiler, set_sensor_0_as_boiler);
-  menu_select_temperature_sensors.add_item(&menu_set_sensor_1_as_outdoor, set_sensor_1_as_outdoor);
+  menu_select_temperature_sensors.add_item(&menu_set_sensor_0_as_outdoor, set_sensor_0_as_outdoor);
   menu_select_temperature_sensors.add_item(&menu_set_sensor_1_as_boiler, set_sensor_1_as_boiler);
+  menu_select_temperature_sensors.add_item(&menu_set_sensor_1_as_outdoor, set_sensor_1_as_outdoor);
   
   menu_root.add_item(&menu_reset_eeprom, &reset_eeprom_addresses);
   
@@ -70,7 +70,7 @@ void scan_temperature_sensors(MenuItem* p_menu_item)
   
   Serial.println("Searching sensors");
   
-  temporary_rom = sensor_0_address;
+  temporary_rom = sensor_0_eeprom_address_begin;
   number_of_sensors = 0;
 
   while(ds.search(addr)) {
@@ -160,28 +160,28 @@ float get_temperature(byte* addr) {
 
 void set_sensor_0_as_outdoor(MenuItem* p_menu_item)
 {
-  copy_address_in_eeprom(sensor_0_address, outdoor_sensor_addr);
+  copy_address_in_eeprom(sensor_0_eeprom_address_begin, outdoor_sensor_eeprom_address_begin);
 
   Serial.println("Sensor 0 set as outdoor");
 }
 
 void set_sensor_0_as_boiler(MenuItem* p_menu_item)
 {
-  copy_address_in_eeprom(sensor_0_address, boiler_sensor_addr);
+  copy_address_in_eeprom(sensor_0_eeprom_address_begin, boiler_sensor_eeprom_address_begin);
 
   Serial.println("Sensor 0 set as boiler");
 }
 
 void set_sensor_1_as_outdoor(MenuItem* p_menu_item)
 {
-  copy_address_in_eeprom(sensor_1_address, outdoor_sensor_addr);
+  copy_address_in_eeprom(sensor_1_eeprom_address_begin, outdoor_sensor_eeprom_address_begin);
 
   Serial.println("Sensor 1 set as outdoor");
 }
 
 void set_sensor_1_as_boiler(MenuItem* p_menu_item)
 {
-  copy_address_in_eeprom(sensor_1_address, boiler_sensor_addr);
+  copy_address_in_eeprom(sensor_1_eeprom_address_begin, boiler_sensor_eeprom_address_begin);
 
   Serial.println("Sensor 1 set as boiler");
 }
@@ -220,10 +220,10 @@ void reset_eeprom_addresses(MenuItem* p_menu_item)
   byte empty_value = 0x00;
   byte empty_address[8] = {0x00};
 
-  put_address_to_eeprom(empty_address, boiler_sensor_addr);
-  put_address_to_eeprom(empty_address, outdoor_sensor_addr);
-  put_address_to_eeprom(empty_address, sensor_0_address);
-  put_address_to_eeprom(empty_address, sensor_1_address);
+  put_address_to_eeprom(empty_address, boiler_sensor_eeprom_address_begin);
+  put_address_to_eeprom(empty_address, outdoor_sensor_eeprom_address_begin);
+  put_address_to_eeprom(empty_address, sensor_0_eeprom_address_begin);
+  put_address_to_eeprom(empty_address, sensor_1_eeprom_address_begin);
 
   Serial.println("EEPROM reset");
 }
@@ -238,12 +238,12 @@ void print_status(MenuItem* p_menu_item)
   
   Serial.println("Temperature and relay status");
 
-  get_address_from_eeprom(boiler_sensor_addr, addr);
+  get_address_from_eeprom(boiler_sensor_eeprom_address_begin, addr);
   Serial.println("Boiler temperature");
   Serial.print(get_temperature(addr));
   Serial.println();
 
-  get_address_from_eeprom(outdoor_sensor_addr, addr);
+  get_address_from_eeprom(outdoor_sensor_eeprom_address_begin, addr);
   Serial.println("Outdoor temperature");
   Serial.print(get_temperature(addr));
   Serial.println();
@@ -266,16 +266,16 @@ void print_eeprom_addresses()
   int i;
   byte address[8];
 
-  get_address_from_eeprom(boiler_sensor_addr, address);
+  get_address_from_eeprom(boiler_sensor_eeprom_address_begin, address);
   print_address(address);
   
-  get_address_from_eeprom(outdoor_sensor_addr, address);
+  get_address_from_eeprom(outdoor_sensor_eeprom_address_begin, address);
   print_address(address);
   
-  get_address_from_eeprom(sensor_0_address, address);
+  get_address_from_eeprom(sensor_0_eeprom_address_begin, address);
   print_address(address);
   
-  get_address_from_eeprom(sensor_1_address, address);
+  get_address_from_eeprom(sensor_1_eeprom_address_begin, address);
   print_address(address);
 
   Serial.println();
@@ -387,12 +387,12 @@ void two_step_controller()
     return;
   }
   
-  get_address_from_eeprom(outdoor_sensor_addr, addr);
+  get_address_from_eeprom(outdoor_sensor_eeprom_address_begin, addr);
   outdoor_temperature = get_temperature(addr);
   
   set_temperature = get_set_temperature(outdoor_temperature, room_set_temperature);
 
-  get_address_from_eeprom(boiler_sensor_addr, addr);
+  get_address_from_eeprom(boiler_sensor_eeprom_address_begin, addr);
   boiler_temperature = get_temperature(addr);
 
   boiler_set_temperature_ratio = boiler_temperature / set_temperature;
