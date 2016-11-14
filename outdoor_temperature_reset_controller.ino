@@ -313,7 +313,7 @@ void loop()
 
 void serial_handler() {
   char input_character;
-  if((input_character = Serial.read())>0) {
+  if((input_character = Serial.read()) > 0) {
     switch(input_character)
     {
     case 'w': // Previus item
