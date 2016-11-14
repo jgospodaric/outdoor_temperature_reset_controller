@@ -378,7 +378,6 @@ void print_help() {
 
 void execute_two_step_outdoor_temperature_reset_controller()
 {
-  bool pump_requested_status;
   byte address[ADDRESS_SIZE];
   float outdoor_temperature;
   float set_temperature;
@@ -386,12 +385,11 @@ void execute_two_step_outdoor_temperature_reset_controller()
   float boiler_set_temperature_ratio;
   float room_set_temperature = 22.0;
   float step_treshhold = 0.05;
-  
-  pump_requested_status = digitalRead(room_pump_request_status_pin);
-  if(pump_requested_status == LOW)
+
+  if(is_pump_requested())
   {
-    digitalWrite(burner_relay_pin, HIGH);
-    digitalWrite(pump_relay_pin, HIGH);
+    turn_off_burner();
+    turn_off_pump();
 
     return;
   }
@@ -408,18 +406,54 @@ void execute_two_step_outdoor_temperature_reset_controller()
   boiler_set_temperature_ratio -= 1.0;
   if(boiler_set_temperature_ratio > step_treshhold)
   {
-    digitalWrite(burner_relay_pin, HIGH);
+    turn_off_burner();
   }
   else
   {
-    digitalWrite(burner_relay_pin, LOW);
+    turn_on_burner();
   }
 
-  digitalWrite(pump_relay_pin, !pump_requested_status);
+  if(is_pump_requested())
+  {
+    turn_off_pump();
+  }
+  else
+  {
+    turn_on_pump();
+  }
+}
+
+bool is_pump_requested()
+{
+  bool pump_requested_status;
+  
+  pump_requested_status = digitalRead(room_pump_request_status_pin);
+
+  return pump_requested_status == HIGH;
 }
 
 float get_set_temperature(float outdoor_temperature, float room_set_temperature)
 {
   // see doc/reset_curves_line_equations.ods in project
   return -1.1 * outdoor_temperature + 42.0 + 0.97 * room_set_temperature - 19.30;
+}
+
+void turn_on_burner()
+{
+  digitalWrite(burner_relay_pin, LOW);
+}
+
+void turn_off_burner()
+{
+  digitalWrite(burner_relay_pin, HIGH);
+}
+
+void turn_on_pump()
+{
+  digitalWrite(pump_relay_pin, LOW);
+}
+
+void turn_off_pump()
+{
+  digitalWrite(pump_relay_pin, HIGH);
 }
