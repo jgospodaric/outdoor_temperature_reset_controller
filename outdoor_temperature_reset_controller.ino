@@ -2,6 +2,8 @@
 #include <OneWire.h>
 #include <EEPROM.h>
 
+#define ADDRESS_SIZE (8)
+
 // Menu variables
 MenuSystem menu;
 
@@ -22,16 +24,12 @@ MenuItem menu_print_status("Print temperatures and relay status");
 OneWire  ds(2);
 
 int boiler_sensor_addr = 1;
-int outdoor_sensor_addr = boiler_sensor_addr + 8;
-int temporary_rom_addr = outdoor_sensor_addr + 8;
-
+int outdoor_sensor_addr = boiler_sensor_addr + ADDRESS_SIZE;
+int temporary_rom_addr = outdoor_sensor_addr + ADDRESS_SIZE;
 
 int burner_relay = 3;
 int pump_relay = 4;
 int room_pump_request_status = 5;
-
-// Menu callback function
-// In this example all menu items use the same callback.
 
 void scan_temperature_sensors(MenuItem* p_menu_item)
 {
