@@ -69,7 +69,8 @@ void scan_temperature_sensors(MenuItem* p_menu_item)
   
   Serial.println("Searching sensors");
 
-  while(ds.search(address)) {
+  while(ds.search(address))
+  {
     switch(number_of_sensors)
     {
     case 0:
@@ -104,9 +105,10 @@ float get_temperature_from_sensor_ds18x20(byte* address) {
   ds.select(address);
   ds.write(0x44, 0);
   
-  if(OneWire::crc8(address, LAST_ADDRESS_BYTE) != address[LAST_ADDRESS_BYTE]) {
-      Serial.println("Addr. CRC is not valid!");
-      return 0.0;
+  if(OneWire::crc8(address, LAST_ADDRESS_BYTE) != address[LAST_ADDRESS_BYTE])
+  {
+    Serial.println("Addr. CRC is not valid!");
+    return 0.0;
   }
   
   present = ds.reset();
@@ -115,38 +117,53 @@ float get_temperature_from_sensor_ds18x20(byte* address) {
   ds.write(0xBE);
 
   // We need 9 bytes
-  for(i = 0; i < 9; i++) {
+  for(int i = 0; i < 9; i++)
+  {
     data[i] = ds.read();
   }
   
-  switch(address[0]) {
-    case 0x10:
-      type_s = 1;
-      break;
-    case 0x28:
-      type_s = 0;
-      break;
-    case 0x22:
-      type_s = 0;
-      break;
-    default:
-      Serial.println("Device is not a DS18x20 family device.");
-      return 0.0;
+  switch(address[0])
+  {
+  case 0x10:
+    type_s = 1;
+    break;
+  case 0x28:
+    type_s = 0;
+    break;
+  case 0x22:
+    type_s = 0;
+    break;
+  default:
+    Serial.println("Device is not a DS18x20 family device.");
+    return 0.0;
   }
   
   int16_t raw = (data[1] << 8) | data[0];
-  if(type_s) {
+  if(type_s)
+  {
     raw = raw << 3; // 9 bit resolution default
-    if(data[7] == 0x10) {
+    if(data[7] == 0x10)
+    {
       // "count remain" gives full 12 bit resolution
       raw = (raw & 0xFFF0) + 12 - data[6];
     }
-  } else {
+  }
+  else
+  {
     byte cfg = (data[4] & 0x60);
     // at lower res, the low bits are undefined, so let's zero them
-    if(cfg == 0x00) raw = raw & ~7;  // 9 bit resolution, 93.75 ms
-    else if(cfg == 0x20) raw = raw & ~3; // 10 bit res, 187.5 ms
-    else if(cfg == 0x40) raw = raw & ~1; // 11 bit res, 375 ms
+    if(cfg == 0x00)
+    {
+      raw = raw & ~7;  // 9 bit resolution, 93.75 ms
+    }
+    else if(cfg == 0x20)
+    {
+      raw = raw & ~3; // 10 bit res, 187.5 ms
+    }
+    else if(cfg == 0x40)
+    {
+      raw = raw & ~1; // 11 bit res, 375 ms
+    }
     //// default is 12 bit resolution, 750 ms conversion time
   }
 
