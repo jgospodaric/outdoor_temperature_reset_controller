@@ -30,18 +30,19 @@ int outdoor_sensor_addr = boiler_sensor_addr + ADDRESS_SIZE;
 int sensor_0_address = outdoor_sensor_addr + ADDRESS_SIZE;
 int sensor_1_address = sensor_0_address + ADDRESS_SIZE;
 
-int burner_relay = 3;
-int pump_relay = 4;
-int room_pump_request_status = 5;
+int burner_relay_pin = 3;
+int pump_relay_pin = 4;
+int room_pump_request_status_pin = 5;
 
 void setup()
 {
   Serial.begin(9600);
-  pinMode(burner_relay, OUTPUT);
-  digitalWrite(burner_relay, HIGH);
-  pinMode(pump_relay, OUTPUT);
-  digitalWrite(pump_relay, HIGH);
-  pinMode(room_pump_request_status, INPUT);
+
+  pinMode(burner_relay_pin, OUTPUT);
+  digitalWrite(burner_relay_pin, HIGH);
+  pinMode(pump_relay_pin, OUTPUT);
+  digitalWrite(pump_relay_pin, HIGH);
+  pinMode(room_pump_request_status_pin, INPUT);
 
   menu_root.add_item(&menu_scan_temperature_sensors, &scan_temperature_sensors);
 
@@ -248,15 +249,15 @@ void print_status(MenuItem* p_menu_item)
   Serial.println();
   
   Serial.println("Pump request status");
-  Serial.print(digitalRead(room_pump_request_status), HEX);
+  Serial.print(digitalRead(room_pump_request_status_pin), HEX);
   Serial.println();
   
   Serial.println("Burner relay status");
-  Serial.print(!digitalRead(burner_relay), HEX);
+  Serial.print(!digitalRead(burner_relay_pin), HEX);
   Serial.println();
 
   Serial.println("Pump relay status");
-  Serial.print(!digitalRead(pump_relay), HEX);
+  Serial.print(!digitalRead(pump_relay_pin), HEX);
   Serial.println();  
 }
 
@@ -377,11 +378,11 @@ void two_step_controller()
   float room_set_temperature = 22.0;
   float step_treshhold = 0.05;
   
-  pump_requested_status = digitalRead(room_pump_request_status);
+  pump_requested_status = digitalRead(room_pump_request_status_pin);
   if(pump_requested_status == LOW)
   {
-    digitalWrite(burner_relay, HIGH);
-    digitalWrite(pump_relay, HIGH);
+    digitalWrite(burner_relay_pin, HIGH);
+    digitalWrite(pump_relay_pin, HIGH);
 
     return;
   }
@@ -398,14 +399,14 @@ void two_step_controller()
   boiler_set_temperature_ratio -= 1.0;
   if(boiler_set_temperature_ratio > step_treshhold)
   {
-    digitalWrite(burner_relay, HIGH);
+    digitalWrite(burner_relay_pin, HIGH);
   }
   else
   {
-    digitalWrite(burner_relay, LOW);
+    digitalWrite(burner_relay_pin, LOW);
   }
 
-  digitalWrite(pump_relay, !pump_requested_status);
+  digitalWrite(pump_relay_pin, !pump_requested_status);
 }
 
 float get_set_temperature(float outdoor_temperature, float room_set_temperature)
