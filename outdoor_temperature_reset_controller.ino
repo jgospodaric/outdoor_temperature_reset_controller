@@ -8,7 +8,7 @@
 #define DATA_SIZE (12)
 #define EEPROM_SIZE (32)
 #define SLEEP_MS (2000)
-#define MIN_TIME_BURNER_STATE_OFF (600000)
+#define MIN_TIME_BURNER_STATE_OFF (600000L)
 
 MenuSystem menu;
 
@@ -36,7 +36,7 @@ int sensor_1_eeprom_address_begin = sensor_0_eeprom_address_begin + ADDRESS_SIZE
 int burner_relay_pin = 3;
 int pump_relay_pin = 4;
 int room_pump_request_status_pin = 5;
-long timer_burner_state_off_ms = 0;
+long timer_burner_state_off_ms = 0L;
 
 void setup()
 {
@@ -311,9 +311,9 @@ void loop()
   
   execute_two_step_outdoor_temperature_reset_controller();
 
-  if(timer_burner_state_off_ms > 0)
+  if(timer_burner_state_off_ms > 0L)
   {
-    timer_burner_state_off_ms -= SLEEP_MS;
+    timer_burner_state_off_ms -= long SLEEP_MS;
   }
 
   delay(SLEEP_MS);
