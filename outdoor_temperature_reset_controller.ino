@@ -67,7 +67,7 @@ void setup()
 
 void scan_temperature_sensors(MenuItem* p_menu_item)
 {
-  byte address[ADDRESS_SIZE];
+  byte address[ADDRESS_SIZE] = {0x00};
   int sensor_eeprom_address_begin = 0;
   int number_of_sensors = 0;
   
@@ -101,9 +101,9 @@ void scan_temperature_sensors(MenuItem* p_menu_item)
 }
 
 float get_temperature_from_sensor_ds18x20(byte* address) {
-  byte data[DATA_SIZE];
-  byte type_s;
-  byte present = 0;
+  byte data[DATA_SIZE] = {0x00};
+  byte type_s = 0x00;
+  byte present = 0x00;
   
   ds.reset();
   ds.select(address);
@@ -204,7 +204,7 @@ void set_sensor_1_as_outdoor(MenuItem* p_menu_item)
 
 void copy_address_in_eeprom(int eeprom_address_source, int eeprom_address_target)
 {
-  byte tmp_address[ADDRESS_SIZE];
+  byte tmp_address[ADDRESS_SIZE] = {0x00};
 
   get_address_from_eeprom(eeprom_address_source, tmp_address);
   put_address_to_eeprom(tmp_address, eeprom_address_target);
@@ -212,9 +212,7 @@ void copy_address_in_eeprom(int eeprom_address_source, int eeprom_address_target
 
 void get_address_from_eeprom(int eeprom_address_source, byte* address_target)
 {
-  int byte_index;
-
-  for(byte_index = ADDRESS_FIRST_BYTE_INDEX; byte_index <= ADDRESS_LAST_BYTE_INDEX; byte_index++)
+  for(int byte_index = ADDRESS_FIRST_BYTE_INDEX; byte_index <= ADDRESS_LAST_BYTE_INDEX; byte_index++)
   {
       address_target[byte_index] = EEPROM.read(eeprom_address_source + byte_index);
   }
@@ -222,9 +220,7 @@ void get_address_from_eeprom(int eeprom_address_source, byte* address_target)
 
 void put_address_to_eeprom(byte* address_source, int eeprom_address_target)
 {
-  int byte_index;
-
-  for(byte_index = ADDRESS_FIRST_BYTE_INDEX; byte_index <= ADDRESS_LAST_BYTE_INDEX; byte_index++)
+  for(int byte_index = ADDRESS_FIRST_BYTE_INDEX; byte_index <= ADDRESS_LAST_BYTE_INDEX; byte_index++)
   {
     EEPROM.write(eeprom_address_target + byte_index, address_source[byte_index]);
   }
@@ -232,7 +228,6 @@ void put_address_to_eeprom(byte* address_source, int eeprom_address_target)
 
 void reset_eeprom_addresses(MenuItem* p_menu_item)
 {
-  int i;
   byte empty_address[ADDRESS_SIZE] = {0x00};
 
   put_address_to_eeprom(empty_address, boiler_sensor_eeprom_address_begin);
@@ -245,7 +240,7 @@ void reset_eeprom_addresses(MenuItem* p_menu_item)
 
 void print_status(MenuItem* p_menu_item)
 {
-  byte address[ADDRESS_SIZE];
+  byte address[ADDRESS_SIZE] = {0x00};
   
   print_eeprom_addresses();
   
@@ -276,7 +271,7 @@ void print_status(MenuItem* p_menu_item)
 
 void print_eeprom_addresses()
 {
-  byte address[ADDRESS_SIZE];
+  byte address[ADDRESS_SIZE] = {0x00};
 
   get_address_from_eeprom(boiler_sensor_eeprom_address_begin, address);
   print_address(address);
@@ -295,9 +290,7 @@ void print_eeprom_addresses()
 
 void print_address(byte* address)
 {
-  int byte_index;
-
-  for(byte_index = ADDRESS_FIRST_BYTE_INDEX; byte_index <= ADDRESS_LAST_BYTE_INDEX; byte_index++)
+  for(int byte_index = ADDRESS_FIRST_BYTE_INDEX; byte_index <= ADDRESS_LAST_BYTE_INDEX; byte_index++)
   {
     Serial.print(address[byte_index], HEX);
     Serial.print(" ");
@@ -320,7 +313,7 @@ void loop()
 }
 
 void serial_handler() {
-  char input_character;
+  char input_character = 0x00;
   if((input_character = Serial.read()) > 0) {
     switch(input_character)
     {
@@ -386,11 +379,11 @@ void print_help() {
 
 void execute_two_step_outdoor_temperature_reset_controller()
 {
-  byte address[ADDRESS_SIZE];
-  float outdoor_temperature;
-  float set_temperature;
-  float boiler_temperature;
-  float boiler_set_temperature_ratio;
+  byte address[ADDRESS_SIZE] = {0x00};
+  float outdoor_temperature = 0.0;
+  float set_temperature = 0.0;
+  float boiler_temperature = 0.0;
+  float boiler_set_temperature_ratio = 0.0;
   float room_set_temperature = 22.0;
   float step_treshhold = 0.05;
 
@@ -433,7 +426,7 @@ void execute_two_step_outdoor_temperature_reset_controller()
 
 bool is_pump_requested()
 {
-  bool pump_requested_status;
+  bool pump_requested_status = false;
   
   pump_requested_status = digitalRead(room_pump_request_status_pin);
 
