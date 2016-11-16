@@ -425,15 +425,6 @@ void execute_two_step_outdoor_temperature_reset_controller()
   }
 }
 
-bool is_pump_requested()
-{
-  bool pump_requested_status = false;
-  
-  pump_requested_status = digitalRead(room_pump_request_status_pin);
-
-  return pump_requested_status == HIGH;
-}
-
 float get_set_temperature(float outdoor_temperature, float room_set_temperature)
 {
   // see doc/reset_curves_line_equations.ods in project
@@ -454,6 +445,15 @@ void turn_off_burner()
 {
   digitalWrite(burner_relay_pin, HIGH);
   timer_burner_state_off_ms = MIN_TIME_BURNER_STATE_OFF;
+}
+
+bool is_pump_requested()
+{
+  bool pump_requested_status = false;
+
+  pump_requested_status = digitalRead(room_pump_request_status_pin);
+
+  return pump_requested_status == HIGH;
 }
 
 void turn_on_pump()
