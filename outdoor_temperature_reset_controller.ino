@@ -415,7 +415,7 @@ void execute_two_step_outdoor_temperature_reset_controller()
     turn_on_burner();
   }
 
-  if(is_pump_requested())
+  if(is_pump_requested() && boiler_set_temperature_ratio > pump_treshold)
   {
     turn_on_pump();
   }
