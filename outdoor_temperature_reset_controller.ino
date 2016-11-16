@@ -427,8 +427,16 @@ void execute_two_step_outdoor_temperature_reset_controller()
 
 float get_set_temperature(float outdoor_temperature, float room_set_temperature)
 {
+  float slope = -1.1;
+  float constant_term_b = 46.2;
+  float correction_slope = 0.967;
+  float correction_constant_term_b = -19.33;
+
   // see doc/reset_curves_line_equations.ods in project
-  return -1.1 * outdoor_temperature + 42.0 + 0.97 * room_set_temperature - 19.30;
+  return slope * outdoor_temperature + \
+    constant_term_b + \
+    correction_slope * room_set_temperature - \
+    correction_constant_term_b;
 }
 
 void turn_on_burner()
