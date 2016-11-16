@@ -386,6 +386,7 @@ void execute_two_step_outdoor_temperature_reset_controller()
   float boiler_set_temperature_ratio = 0.0;
   float room_set_temperature = 22.0;
   float step_treshhold = 0.05;
+  float pump_treshhold = 0.02;
 
   if(is_pump_requested())
   {
@@ -416,11 +417,11 @@ void execute_two_step_outdoor_temperature_reset_controller()
 
   if(is_pump_requested())
   {
-    turn_off_pump();
+    turn_on_pump();
   }
   else
   {
-    turn_on_pump();
+    turn_off_pump();
   }
 }
 
