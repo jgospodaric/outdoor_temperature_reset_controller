@@ -69,13 +69,14 @@ void scan_temperature_sensors(MenuItem* p_menu_item)
 {
   byte address[ADDRESS_SIZE] = {0x00};
   int sensor_eeprom_address_begin = 0;
-  int number_of_sensors = 0;
+  int sensor_id, number_of_sensors = 0;
+  char output_print_line[80] = {0x00};
   
   Serial.println("Searching sensors");
 
   while(ds.search(address))
   {
-    switch(number_of_sensors)
+    switch(sensor_id)
     {
     case 0:
       sensor_eeprom_address_begin = sensor_0_eeprom_address_begin;
@@ -83,21 +84,19 @@ void scan_temperature_sensors(MenuItem* p_menu_item)
       sensor_eeprom_address_begin = sensor_1_eeprom_address_begin;
     }
 
-    Serial.print("Found ROM[sensor ");
-    Serial.print(number_of_sensors, DEC);
-    Serial.print("]");
-    Serial.println();
-    
+    sprintf(output_print_line, "Found ROM[sensor %d]\n", number_of_sensors);
+    Serial.print(output_print_line);
+      
     put_address_to_eeprom(address, sensor_eeprom_address_begin);
     print_address(address);
 
-    number_of_sensors += 1;    
+    sensor_id += 1;
   }
 
-  Serial.print("Found ");
-  Serial.print(number_of_sensors, DEC);
-  Serial.println(" sensors.");
-  Serial.println();
+  number_of_sensors = sensor_id;
+
+  sprintf(output_print_line, "Found %d sensors.\n", number_of_sensors);
+  Serial.print(output_print_line);
 }
 
 float get_temperature_from_sensor_ds18x20(byte* address) {
@@ -241,32 +240,34 @@ void reset_eeprom_addresses(MenuItem* p_menu_item)
 void print_status(MenuItem* p_menu_item)
 {
   byte address[ADDRESS_SIZE] = {0x00};
-  
+  char output_print_line[80] = {0x00};
+
   print_eeprom_addresses();
   
   Serial.println("Temperature and relay status");
 
   get_address_from_eeprom(boiler_sensor_eeprom_address_begin, address);
-  Serial.println("Boiler temperature");
-  Serial.print(get_temperature_from_sensor_ds18x20(address));
-  Serial.println();
+  sprintf(output_print_line, "Boiler temperature %0.2f\n", get_temperature_from_sensor_ds18x20(address));
+  Serial.print(output_print_line);
 
   get_address_from_eeprom(outdoor_sensor_eeprom_address_begin, address);
   Serial.println("Outdoor temperature");
-  Serial.print(get_temperature_from_sensor_ds18x20(address));
-  Serial.println();
+  sprintf(output_print_line, "Boiler temperature %0.2f\n", get_temperature_from_sensor_ds18x20(address));
+  Serial.print(output_print_line);
   
-  Serial.println("Pump room request status");
-  Serial.print(digitalRead(room_pump_request_status_pin), HEX);
-  Serial.println();
+  sprintf(output_print_line, "Pump room request status %s\n", boolean_to_on_off_string(is_pump_requested()));
+  Serial.print(output_print_line);
   
-  Serial.println("Burner relay status");
-  Serial.print(!digitalRead(burner_relay_pin), HEX);
-  Serial.println();
+  sprintf(output_print_line, "Burner relay status %s\n", boolean_to_on_off_string(!digitalRead(burner_relay_pin)));
+  Serial.print(output_print_line);
 
-  Serial.println("Pump relay status");
-  Serial.print(!digitalRead(pump_relay_pin), HEX);
-  Serial.println();  
+
+  Serial.print(output_print_line);
+}
+
+const char * boolean_to_on_off_string(boolean boolean_var)
+{
+  return boolean_var ? "on" : "off";
 }
 
 void print_eeprom_addresses()
@@ -290,12 +291,16 @@ void print_eeprom_addresses()
 
 void print_address(byte* address)
 {
-  for(int byte_index = ADDRESS_FIRST_BYTE_INDEX; byte_index <= ADDRESS_LAST_BYTE_INDEX; byte_index++)
+  char test[20];
+  int byte_index = ADDRESS_FIRST_BYTE_INDEX;
+  char output_print_line[80] = {0x00};
+  
+  for(; byte_index <= ADDRESS_LAST_BYTE_INDEX; byte_index++)
   {
-    Serial.print(address[byte_index], HEX);
-    Serial.print(" ");
+    sprintf(output_print_line + byte_index * 3, "%02X ", address[byte_index]);
   }
-  Serial.println();
+  sprintf(output_print_line + byte_index * 3, "\n");
+  Serial.print(output_print_line);
 }
 
 void loop()
