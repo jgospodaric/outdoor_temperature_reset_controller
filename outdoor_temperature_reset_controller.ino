@@ -419,7 +419,7 @@ void execute_two_step_outdoor_temperature_reset_controller()
   {
     turn_on_pump();
   }
-  else
+  else if(!is_pump_requested())
   {
     turn_off_pump();
   }
