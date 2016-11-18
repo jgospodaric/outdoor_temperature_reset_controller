@@ -456,8 +456,12 @@ void turn_on_burner()
 
 void turn_off_burner()
 {
+  if(digitalRead(burner_relay_pin, HIGH) == LOW)
+  {
+    timer_burner_state_off_ms = MIN_TIME_BURNER_STATE_OFF;
+  }
+
   digitalWrite(burner_relay_pin, HIGH);
-  timer_burner_state_off_ms = MIN_TIME_BURNER_STATE_OFF;
 }
 
 bool is_pump_requested()
